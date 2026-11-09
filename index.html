@@ -1,0 +1,603 @@
+<!doctype html>
+
+<html lang="vi">
+
+<head>
+
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta name="theme-color" content="#090e1b">
+
+<title>MDANG KEY SYSTEM</title>
+
+<style>
+
+:root {
+
+ --bg:#090e1b;
+
+ --panel:#111a2d;
+
+ --line:#ffffff14;
+
+ --txt:#edf2ff;
+
+ --muted:#91a0ba;
+
+ --purple:#8b5cf6;
+
+ --cyan:#22d3ee;
+
+ --green:#34d399;
+
+ --red:#fb7185;
+
+ --amber:#fbbf24;
+
+}
+
+*{box-sizing:border-box}
+
+body{
+
+ margin:0;
+
+ background:radial-gradient(800px 420px at 80% -5%,#6d28d933,transparent 60%),var(--bg);
+
+ color:var(--txt);
+
+ font:14px Inter,system-ui,Arial
+
+}
+
+.layout{max-width:1400px;margin:auto;padding:26px}
+
+.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:25px}
+
+.brand{display:flex;align-items:center;gap:12px}
+
+.logo{
+
+ width:44px;height:44px;border-radius:14px;
+
+ display:grid;place-items:center;font-size:20px;
+
+ font-weight:900;background:linear-gradient(135deg,var(--purple),var(--cyan))
+
+}
+
+.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2px}
+
+.brand b{letter-spacing:1px}
+
+.chip{border:1px solid var(--line);border-radius:99px;padding:8px 12px;color:var(--muted);font-size:11px}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+.card{background:linear-gradient(145deg,#151f35,#10182a);border:1px solid var(--line);border-radius:17px;padding:18px;box-shadow:0 18px 50px #0003}
+
+.stat span{color:var(--muted);font-size:11px}
+
+.stat strong{display:block;font-size:30px;margin-top:9px}
+
+.panel{margin-top:17px}
+
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+
+.head h2{font-size:15px;margin:0}
+
+.muted{color:var(--muted);font-size:11px}
+
+.row{display:flex;gap:9px;flex-wrap:wrap}
+
+.field{background:#0b1324;border:1px solid var(--line);color:var(--txt);padding:11px 12px;border-radius:10px;outline:none;min-width:0}
+
+.field:focus{border-color:var(--purple)}
+
+.search{flex:1;min-width:180px}
+
+.btn{border:1px solid var(--line);background:#ffffff0b;color:var(--txt);border-radius:10px;padding:10px 14px;font-weight:650;cursor:pointer}
+
+.btn.primary{border:0;background:linear-gradient(110deg,#7c3aed,#6366f1,#0891b2)}
+
+.btn.danger{color:#fda4af}
+
+.tablewrap{overflow:auto}
+
+table{width:100%;border-collapse:collapse;min-width:700px}
+
+th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #ffffff0d}
+
+th{color:#71809b;font-size:10px;letter-spacing:1px}
+
+td{font-size:12px}
+
+.key{font-family:ui-monospace,monospace;color:#c4b5fd}
+
+.badge{padding:5px 9px;border-radius:30px;font-size:10px}
+
+.active{color:var(--green);background:#34d39918}
+
+.expired{color:var(--amber);background:#fbbf2418}
+
+.revoked{color:var(--red);background:#fb718518}
+
+.actions{display:flex;gap:6px}
+
+.small{padding:6px 9px;font-size:11px}
+
+.notice{margin-top:15px;padding:13px;border:1px solid #fbbf2433;background:#fbbf240c;color:#f8d78d;border-radius:12px;font-size:11px}
+
+.hidden{display:none!important}
+
+.login{max-width:420px;margin:10vh auto}
+
+.login h1{font-size:23px}
+
+.login p{color:var(--muted);font-size:12px}
+
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.layout{padding:17px}}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="layout">
+
+<header class="top">
+
+ <div class="brand">
+
+  <div class="logo">M</div>
+
+  <div>
+
+   <b>MDANG KEY SYSTEM</b>
+
+   <small>REMOTE LICENSE CONTROL</small>
+
+  </div>
+
+ </div>
+
+ <div class="chip" id="connection">● Chưa kết nối API</div>
+
+</header>
+
+<section id="login" class="card login">
+
+ <div class="muted">ADMIN ACCESS</div>
+
+ <h1>Đăng nhập quản trị</h1>
+
+ <p>Đăng nhập bằng tài khoản quản trị Cloudflare Worker.</p>
+
+ <input id="api" class="field" style="width:100%;margin:6px 0"
+
+ placeholder="Worker API URL">
+
+ <input id="username" class="field" style="width:100%;margin:6px 0"
+
+ placeholder="Tên tài khoản admin" autocomplete="username">
+
+ <input id="password" type="password" class="field"
+
+ style="width:100%;margin:6px 0"
+
+ placeholder="Mật khẩu admin" autocomplete="current-password">
+
+ <button class="btn primary" style="width:100%;margin-top:9px"
+
+ onclick="login()">Đăng nhập</button>
+
+</section>
+
+<section id="dashboard" class="hidden">
+
+<div class="grid">
+
+ <div class="card stat"><span>TỔNG KEY</span><strong id="total">0</strong></div>
+
+ <div class="card stat"><span>ĐANG HOẠT ĐỘNG</span><strong id="activeCount">0</strong></div>
+
+ <div class="card stat"><span>ĐÃ HẾT HẠN</span><strong id="expiredCount">0</strong></div>
+
+ <div class="card stat"><span>ĐÃ THU HỒI</span><strong id="revokedCount">0</strong></div>
+
+</div>
+
+<div class="card panel">
+
+ <div class="head">
+
+  <div>
+
+   <h2>Quản lý License Key</h2>
+
+   <div class="muted">Dữ liệu đồng bộ qua API</div>
+
+  </div>
+
+  <button class="btn" onclick="logout()">Đăng xuất</button>
+
+ </div>
+
+ <div class="row" style="margin-bottom:12px">
+
+  <input id="newNote" class="field" placeholder="Ghi chú / người dùng">
+
+  <select id="days" class="field">
+
+   <option value="1">1 ngày</option>
+
+   <option value="7" selected>7 ngày</option>
+
+   <option value="30">30 ngày</option>
+
+   <option value="90">90 ngày</option>
+
+   <option value="365">365 ngày</option>
+
+   <option value="0">Vĩnh viễn</option>
+
+  </select>
+
+  <button class="btn primary" onclick="createKey()">＋ Tạo key</button>
+
+ </div>
+
+ <div class="row" style="margin-bottom:13px">
+
+  <input id="search" class="field search"
+
+  placeholder="Tìm key hoặc ghi chú..." oninput="render()">
+
+  <select id="filter" class="field" onchange="render()">
+
+   <option value="all">Tất cả</option>
+
+   <option value="active">Hoạt động</option>
+
+   <option value="expired">Hết hạn</option>
+
+   <option value="revoked">Thu hồi</option>
+
+  </select>
+
+  <button class="btn" onclick="loadKeys()">↻ Làm mới</button>
+
+ </div>
+
+ <div class="tablewrap">
+
+  <table>
+
+   <thead>
+
+    <tr>
+
+     <th>KEY</th>
+
+     <th>GHI CHÚ</th>
+
+     <th>HẾT HẠN</th>
+
+     <th>TRẠNG THÁI</th>
+
+     <th>THAO TÁC</th>
+
+    </tr>
+
+   </thead>
+
+   <tbody id="rows"></tbody>
+
+  </table>
+
+ </div>
+
+</div>
+
+<div class="notice">
+
+ Dùng cho trải nghiệm Roblox do bạn sở hữu hoặc quản lý.
+
+</div>
+
+</section>
+
+</div>
+
+<script>
+
+let API='',TOKEN='',KEYS=[];
+
+const $=id=>document.getElementById(id);
+
+function msg(t){alert(t)}
+
+function status(k){
+
+ if(k.revoked)return'revoked';
+
+ if(k.expiresAt&&Date.now()>k.expiresAt)return'expired';
+
+ return'active';
+
+}
+
+async function request(path,method='GET',body=null,auth=true){
+
+ const h={'Content-Type':'application/json'};
+
+ if(auth&&TOKEN)h.Authorization='Bearer '+TOKEN;
+
+ const r=await fetch(API+path,{
+
+  method,
+
+  headers:h,
+
+  body:body?JSON.stringify(body):undefined
+
+ });
+
+ let d={};
+
+ try{d=await r.json()}catch{}
+
+ if(!r.ok)throw Error(d.error||('HTTP '+r.status));
+
+ return d;
+
+}
+
+async function login(){
+
+ API=$('api').value.trim().replace(/\/$/,'');
+
+ if(!API.startsWith('https://')){
+
+  return msg('Nhập Worker API URL hợp lệ.');
+
+ }
+
+ try{
+
+  const d=await request('/admin/login','POST',{
+
+   username:$('username').value.trim(),
+
+   password:$('password').value
+
+  },false);
+
+  TOKEN=d.token;
+
+  localStorage.setItem('mdang_api',API);
+
+  localStorage.setItem('mdang_token',TOKEN);
+
+  $('login').classList.add('hidden');
+
+  $('dashboard').classList.remove('hidden');
+
+  await loadKeys();
+
+ }catch(e){
+
+  msg('Đăng nhập thất bại: '+e.message);
+
+ }
+
+}
+
+function logout(){
+
+ TOKEN='';
+
+ localStorage.removeItem('mdang_token');
+
+ $('dashboard').classList.add('hidden');
+
+ $('login').classList.remove('hidden');
+
+}
+
+async function loadKeys(){
+
+ try{
+
+  const d=await request('/admin/keys');
+
+  KEYS=d.keys||[];
+
+  render();
+
+ }catch(e){
+
+  msg('Không tải được key: '+e.message);
+
+ }
+
+}
+
+function render(){
+
+ const q=$('search').value.toLowerCase();
+
+ const f=$('filter').value;
+
+ let c={active:0,expired:0,revoked:0};
+
+ KEYS.forEach(k=>c[status(k)]++);
+
+ $('total').textContent=KEYS.length;
+
+ $('activeCount').textContent=c.active;
+
+ $('expiredCount').textContent=c.expired;
+
+ $('revokedCount').textContent=c.revoked;
+
+ const list=KEYS.filter(k=>
+
+  (f==='all'||status(k)===f)&&
+
+  (`${k.key} ${k.note||''}`.toLowerCase().includes(q))
+
+ );
+
+ $('rows').innerHTML=list.map(k=>{
+
+  let s=status(k);
+
+  return `<tr>
+
+   <td class="key">${esc(k.key)}</td>
+
+   <td>${esc(k.note||'—')}</td>
+
+   <td>${k.expiresAt?new Date(k.expiresAt).toLocaleString('vi-VN'):'Vĩnh viễn'}</td>
+
+   <td><span class="badge ${s}">${s}</span></td>
+
+   <td>
+
+    <button class="btn small" onclick="copyKey('${k.id}')">Copy</button>
+
+    <button class="btn small danger" onclick="setRevoke('${k.id}',true)">Thu hồi</button>
+
+    <button class="btn small danger" onclick="removeKey('${k.id}')">Xóa</button>
+
+   </td>
+
+  </tr>`;
+
+ }).join('');
+
+}
+
+function esc(s){
+
+ return String(s??'').replace(/[&<>"']/g,c=>({
+
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+
+ }[c]));
+
+}
+
+async function createKey(){
+
+ try{
+
+  const d=await request('/admin/keys','POST',{
+
+   days:Number($('days').value),
+
+   note:$('newNote').value.trim()
+
+  });
+
+  KEYS.unshift(d.key);
+
+  $('newNote').value='';
+
+  render();
+
+  await loadKeys();
+
+  msg('Đã tạo key');
+
+ }catch(e){
+
+  msg(e.message);
+
+ }
+
+}
+
+async function setRevoke(id,revoked){
+
+ try{
+
+  await request('/admin/keys/'+encodeURIComponent(id),'PATCH',{revoked});
+
+  await loadKeys();
+
+ }catch(e){msg(e.message)}
+
+}
+
+async function removeKey(id){
+
+ if(!confirm('Xóa key này vĩnh viễn?'))return;
+
+ try{
+
+  await request('/admin/keys/'+encodeURIComponent(id),'DELETE');
+
+  await loadKeys();
+
+ }catch(e){msg(e.message)}
+
+}
+
+async function copyKey(id){
+
+ const k=KEYS.find(x=>x.id===id);
+
+ if(k){
+
+  await navigator.clipboard.writeText(k.key);
+
+  msg('Đã sao chép key');
+
+ }
+
+}
+
+(async()=>{
+
+ const a=localStorage.getItem('mdang_api');
+
+ const t=localStorage.getItem('mdang_token');
+
+ if(a)$('api').value=a;
+
+ if(a&&t){
+
+  API=a;
+
+  TOKEN=t;
+
+  try{
+
+   await request('/admin/keys');
+
+   $('login').classList.add('hidden');
+
+   $('dashboard').classList.remove('hidden');
+
+   await loadKeys();
+
+  }catch{
+
+   logout();
+
+  }
+
+ }
+
+})();
+
+</script>
+
+</body>
+
+</html>
